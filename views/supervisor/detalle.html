@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html ng-app="secreto">
+<head>
+	<meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <!--meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /-->
+
+	<title>Home -SECRETARIO-</title>
+	<!-- obtenidos de la red -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Hojas de estilos (css) -->
+    <link rel="stylesheet" type="text/css" href="../../css/material.teal-red.min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/plugin-min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/styles.css">
+    <!-- para iconos -->
+    <link rel="stylesheet" type="text/css" href="../../font-awesome/css/font-awesome.css"/>
+    <!--  Scripts-->
+    <script type="text/javascript" src="../../js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../../js/angular.min.js"></script>
+    <script type="text/javascript" src="../../js/material.min.js"></script>
+    <script type="text/javascript" src="../../js/plugin-min.js"></script>
+    <script type="text/javascript" src="../../js/socket.io-1.3.7.js"></script>
+    <script type="text/javascript" src="../../js/moment.min.js"></script>
+    <script type="text/javascript" src="../../js/materialize.min.js"></script>
+    <script type="text/javascript" src="../../js/applicationsup.js"></script>
+</head>
+
+<body ng-controller="supervisorCtrl">
+<!-- -->
+<div id="main">
+	<div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <a href="home.html" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </a>
+            <b style="color:white;">Acuerdo: {{acuerdo.ACUCON}} -- {{acuerdo.ACUSTA}}</b>
+        </div>
+        <div class="card-content">
+            <p>
+                <b>Descripción del acuerdo: {{acuerdo.ACUDES}}</b><br>
+            </p> 
+            <p style="font-size:8.5pt;">
+                <em>Fecha Límite para cumplir con el acuerdo: {{acuerdo.ACUTIM}}</em> y <b>{{limiteT}}</b>
+            </p>
+            <div class="alert alert-warning center" ng-if="acuerdo.ACUSTA == 'D'">Esta en DESTIEMPO este acuerdo</div>
+            <hr>
+            <div class="alert alert-info" ng-if="tareas.length == 0">Agregue tareas <i class="fa fa-pencil"></i></div>
+            <ul class="collection littlespace" ng-repeat="t in tareas">
+                <li class="collection-item avatar">
+                    <a ng-click="viewTarea(t)">
+                        <!--i class="fa fa-users circle blue"></i-->
+                        <!--i class="circle blue">T{{t.TARCON}}</i-->
+                        <i class="circle grey" ng-if="t.TARSTA == ''"> C </i>
+                        <i class="fa fa-share circle brown" ng-if="t.TARSTA == 'A'"></i>
+                        <i class="fa fa-spinner circle green" ng-if="t.TARSTA == 'V'"></i>
+                        <i class="fa fa-thumbs-up circle blue" ng-if="t.TARSTA == 'T'"></i>
+                        <i class="fa fa-exclamation circle orange" ng-if="t.TARSTA == 'R'"></i>
+                        <!--span class="title" style="color: black;"><b>Tarea #{{t.TARCON}}</b></span-->
+                        <span class="title" style="color: black;"><b>{{t.TARDES}} --> ({{t.TARSTA}})</b></span>
+                        <hr>
+                        <b ng-repeat="e in empleados" ng-if="e._id == t.TARRES">Encargado: {{e.EMPNOM}}</b>
+                        <hr>
+                        <p>
+                            Total de hrs para realizar la tarea: {{t.TARCAN}} hrs. 
+                            Con un presupuesto de ${{t.TARIMP}}.<br>
+                            <!--{{t.dependencias}}-->
+                        </p>
+                    </a>
+                </li>
+            </ul>
+            <div class="row" ng-if="tareas.length > 0 && (acuerdo.ACUSTA == 'A' || acuerdo.ACUSTA == 'D')">
+                <div class="input-field col s12"></div>
+                    <button class="btn waves-light col s12" type='button' ng-click="showConfirmT()">
+                        Enviar las tareas
+                        <i class="fa fa-thumbs-up"></i>
+                    </button>
+            </div>
+        </div>
+        <div class="fixed-action-btn">
+            <a id="" class="btn-floating btn-large indigo" ng-click="viewForm()" ng-if="acuerdo.ACUSTA == 'A' || acuerdo.ACUSTA == 'D'">
+                <i class="fa fa-pencil"></i>
+            </a>
+        </div>
+    </div>
+</div>
+<!-- -->
+
+<div id="new">
+    <div class="card" style="margin:6px;">
+        <div class="card-image indigo">
+            <!--h4 class="center">Nueva Tarea</h4-->
+            <button id="hideForm" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+        </div>
+        <div class="card-content">
+            <span class="card-title grey-text text-darken-4">
+                <form ng-submit="nuevaTarea()">
+                    <div class="row">
+                        <p class="center" style="font-size:15pt;">
+                            <i class="fa fa-pencil-square-o"></i>
+                            Nueva Tarea
+                        </p>
+                    </div>
+                    <div class="row margin">
+                        <label for="num" class="center-align grey-text"><i class='fa fa-user'></i> Operador a Cargo</label>
+                        <select class="browser-default" ng-model="tareaN.TARRES" required>
+                            <option value="" disabled="">Seleccione a un operador</option>
+                            <option ng-repeat="e in empleados" value="{{e._id}}">{{e.EMPNOM}}</option>
+                        </select>
+                    </div>
+                    <div class="row margin">
+                        <div class="input-field col s12 blue-text">
+                            <i class="fa fa-pencil prefix"></i>
+                            <textarea id="icon_prefix2" class="materialize-textarea" ng-model="tareaN.TARDES" required="true" placeholder="Descripción de la tarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="row margin">
+                        <div class="input-field col s12 blue-text">
+                            <i class="fa fa-clock-o prefix"></i>
+                            <input id="fecha" type="number" min="1" class="" required="true" placeholder="Horas totales para llevar a cabo la tarea" ng-model="tareaN.TARCAN"/>
+                        </div>
+                    </div>
+                    <div class="row margin">
+                        <div class="input-field col s12 blue-text">
+                            <i class="fa fa-file-o prefix"></i>
+                            <input id="hora" ng-model="tareaN.TARENT" type="text" class="" required="true" placeholder="URL del archivo"/>
+                        </div>
+                    </div>
+                    <div class="row margin">
+                        <div class="input-field col s12 blue-text">
+                            <i class="fa fa-money prefix"></i>
+                            <input id="lugar" ng-model="tareaN.TARIMP" type="number" min="1" required="true" placeholder="Presupuesto para llevar a cabo la tarea"/>
+                        </div>
+                    </div>
+                    <div class="row margin">
+                        <a id="showDep">Agregar Dependencias a la tarea</a>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <div id="msjError"></div>
+                            <button class="btn col s12 indigo" type='submit' name='action'>
+                                Crear
+                                <i class="fa fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </span>
+            <!--p><a href="#">This is a link</a></p-->
+        </div>
+    </div>
+</div>
+
+<div id="dependencias">
+    <div class="card" style="margin:6px;">
+        <div class="card-image indigo">
+            <!--h4 class="center">Nueva Tarea</h4-->
+            <button id="hideDep" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color:white;font-weight: bolder;">Seleccione las dependencias para la tarea #{{tareas.length + 1}}</b>
+        </div>
+        <div class="card-content">
+            <span class="card-title grey-text text-darken-4">
+                <p ng-repeat="t in tareas">
+                    <input type="checkbox" id="{{t._id}}" ng-click="dependencies(t._id)"/>
+                    <label for="{{t._id}}">{{t.TARCON}} ({{t.TARDES}})</label>          
+                </p>
+            </span>
+            <span class="grey-text text-darken-4">
+                <h6 class="center">Dependencias de la Tarea #{{tareas.length + 1}}:</h6>
+                <b ng-repeat="dep in dependenciesT">
+                    - <b ng-repeat="t in tareas" ng-if="t._id == dep">Tarea #{{t.TARCON}} -> ({{t.TARDES}})</b><br>
+                </b>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div id="confirmT">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <button class="btn-floating indigo" ng-click="hideConfirmT()" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+        </div>
+        <div class="card-content">
+            Esta Seguro que desea enviar las tareas del Acuerdo {{acuerdo.ACUCON}} (<b><em>{{acuerdo.ACUDES}}</em></b>)???
+            <hr>
+            Si no esta seguro de esta operación, puede volver atras y verificar sus tareas.
+            <div class="row">
+                <div class="input-field col s12">
+                    <button class="btn waves-light col s12 indigo" type='button' ng-click="enviarTareas()">
+                        Enviar
+                        <i class="fa fa-thumbs-share"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="task">
+    <div class="card" style="margin:6px;">
+        <div class="card-image indigo">
+            <!--h4 class="center">Nueva Tarea</h4-->
+            <button id="hideTask" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color:white;font-weight: bolder;">Tarea #{{task.TARCON}}</b>
+        </div>
+        <div class="card-content">
+            <!--span class="card-title grey-text text-darken-4">
+                <b>Tarea #{{task.TARCON}}: {{task.TARDES}}</b>
+            </span-->
+            <b>Descripción: {{task.TARDES}}</b>
+            <br>
+            <hr>
+            <b class="text-center">URL del entregable: <a href="http://{{task.TARURL}}">{{task.TARURL}}</a></b>
+            <hr>
+            <div class="alert alert-primary brown" style="color:white" ng-if="task.TARSTA == 'A'">Tarea Asignada, esperando...</div>
+            <div class="alert alert-primary green" style="color:white" ng-if="task.TARSTA == 'V'">Tarea en proceso de verificación</div>
+            <div class="alert alert-primary blue" style="color:white" ng-if="task.TARSTA == 'T'">Tarea Terminada</div>
+            <div class="alert alert-primary orange" style="color:white" ng-if="task.TARSTA == 'R'">Tarea Rechazada, esperando de nuevo...</div>
+
+            <div class="row" ng-if="task.TARSTA == 'V'">
+                <hr>
+                <em>Esta bien lo que le entregaron?</em><br>
+                <div class="input-field col s6">
+                    <button class="btn waves-light col s6 indigo" type='button' ng-click="accept()">
+                        Si
+                        <i class="fa fa-thumbs-share"></i>
+                    </button>
+                </div>
+                <div class="input-field col s6">
+                    <button class="btn waves-light col s6 red" type='button' ng-click="notaccept()">
+                        No
+                        <i class="fa fa-thumbs-share"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="accept">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <button class="btn-floating indigo" id="hideAccept" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+        </div>
+        <div class="card-content">
+            Esta Seguro que desea aceptar el entregable que le enviaron de esta tarea (<b><em>{{task.TARDES}}</em></b>)???
+            <hr>
+            Si no esta seguro de esta operación, puede volver atras y verificar de nuevo.
+            <div class="row">
+                <div class="input-field col s12">
+                    <button class="btn waves-light col s12 indigo" type='button' ng-click="validarTarea(1)">
+                        Validar
+                        <i class="fa fa-thumbs-share"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="notaccept">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <button class="btn-floating indigo" id="hideNotaccept" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+        </div>
+        <div class="card-content">
+            Esta Seguro que desea rechazar el entregable que le enviaron de esta tarea (<b><em>{{task.TARDES}}</em></b>)???
+            <hr>
+            Si no esta seguro de esta operación, puede volver atras y verificar de nuevo.
+            <div class="row">
+                <div class="input-field col s12">
+                    <button class="btn waves-light col s12 red" type='button' ng-click="validarTarea(2)">
+                        Rechazar
+                        <i class="fa fa-thumbs-share"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+
+</body>
+</html>

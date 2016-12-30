@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html ng-app="secreto">
+<head>
+	<meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <!--meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /-->
+	<title>Orden - Acuerdo</title>
+	<!-- obtenidos de la red -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Hojas de estilos (css) -->
+    <link rel="stylesheet" type="text/css" href="../../css/material.teal-red.min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/plugin-min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/styles.css">
+    <!-- para iconos -->
+    <link rel="stylesheet" type="text/css" href="../../font-awesome/css/font-awesome.css"/>
+    <!--  Scripts-->
+    <script type="text/javascript" src="../../js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../../js/angular.min.js"></script>
+    <script type="text/javascript" src="../../js/material.min.js"></script>
+    <script type="text/javascript" src="../../js/plugin-min.js"></script>
+    <script type="text/javascript" src="../../js/socket.io-1.3.7.js"></script>
+    <script type="text/javascript" src="../../js/application.js"></script>
+
+</head>
+<body ng-controller="secretarioCtrl">
+<!-- -->
+<div id="main">
+	<div class="card" style="margin:6px;">
+        <div class="card-image waves-effect waves-block waves-light indigo">
+            <!--i class="fa fa-trash fa-2x"></i-->
+            <a href="detalle.html?id={{junta._id}}/" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </a>
+            <div class="right" style="margin: 5px 12px 0px 0px;">
+                <a href="#" ng-click="" style="color:white;"><i class="fa fa-pencil fa-2x"></i></a>
+            </div>
+            <div class="right" style="margin: 5px 10px 0px 0px;">
+                <a href="#" ng-click="" style="color:white;" ng-if="acuerdoByOrden.length == 0"><i class="fa fa-trash fa-2x"></i></a>
+            </div>
+            <b style="color:white">Punto {{orden.ORDCON}}:</b>
+        </div>
+        <div class="card-content">
+        	Punto {{orden.ORDCON}} ({{orden.ORDDES}}) de la orden del día para la Junta: {{junta.JUNNUM}}
+            <div class="alert alert-info"><b style="font-size: 9pt;">Agregue acuerdos a este punto de la orden del día (No son obligatorios los acuerdos)</b></div>
+            <hr>
+            <h6 class="center" ng-if="acuerdoByOrden.length > 0">Acuerdos de este punto</h6>
+            <ul class="collection littlespace" ng-repeat="a in acuerdoByOrden">
+                <li class="collection-item avatar">
+                    <a href="#" ng-click="viewOneAcuerdo(a)">
+                        <i class="fa fa-star circle blue"></i>
+                        <span class="title" style="color:black;font-size:9pt;"><b>{{orden.ORDCON}}.{{a.ACUCON}}. {{a.ACUDES}}</b></span>
+                        <br>
+                        - <b style="font-size:9pt;">Presupuesto: ${{a.ACUPRE}}, con fecha limite {{a.ACUTIM}}</b>
+                        <br>
+                        <b ng-repeat="d in directivos">
+                            <b ng-if="d._id == a.ACUEMP" style="font-size:9pt;">- Encargado(a):{{d.EMPNOM}}</b>
+                        </b>
+                    </a>
+                </li>
+            </ul>
+            <div class="fixed-action-btn">
+				<a id="showForm" class="btn-floating btn-large indigo">
+			    	<i class="fa fa-plus"></i>
+			    </a>
+			</div>
+        </div>
+    </div>
+</div>
+<!-- -->
+<div id="new">
+	<div class="card" style="margin:6px;">
+		<div class="card-image waves-effect waves-block waves-light indigo">
+        	<button id="hideForm" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+				<i class="fa fa-arrow-circle-left"></i>
+			</button>
+        </div>
+        <div class="card-content">
+			
+            <form ng-submit="nuevoAcuerdo()">
+                <div class="row">
+                    <p class="center" style="font-size:15pt;">
+                        <i class="fa fa-pencil-square-o"></i>
+                        Nuevo Acuerdo del Punto {{orden.ORDCON}} ==> {{consecutivo}}
+                    </p>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12 blue-text">
+                        <i class="fa fa-pencil prefix"></i>
+                        <textarea id="icon_prefix2" class="materialize-textarea" ng-model="acuerdoN.ACUDES" required="true" placeholder="Descripción del nuevo acuerdo"></textarea>
+                    </div>
+                </div>
+                <div class="row margin">
+                    <label for="num"  class="center-align grey-text"><i class='fa fa-user'></i> Directivo a Cargo</label>
+                    <select class="browser-default" ng-model="acuerdoN.ACUEMP" required>
+                        <option value="" disabled="">Seleccione a un directivo</option>
+                        <option ng-repeat="d in directivos" value="{{d._id}}">{{d.EMPNOM}}</option>
+                    </select>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12 blue-text">
+                        <i class="fa fa-money prefix"></i>
+                        <input id="" ng-model="acuerdoN.ACUPRE" type="number" required="true" placeholder="Presupuesto para el acuerdo"/>
+                    </div>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12 blue-text">
+                        <i class="fa fa-calendar prefix"></i>
+                        <input id="fecha" ng-model="acuerdoN.ACTUTIM" type="text" class="datepicker" required placeholder="Fecha Límite"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12"></div>
+                        <div id="msjError"></div>
+                        <button class="btn waves-effect waves-light col s12 indigo" type='submit' name='action'>
+                            Crear Acuerdo
+                            <i class="fa fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- INICIO Editar un acuerdo -->
+<div id="oneAcuerdo">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-effect waves-block waves-light indigo">
+            <!--i class="fa fa-trash fa-2x"></i-->
+            <button id="hideOneAcuerdo" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color:white">Acuerdo {{orden.ORDCON}}.{{oneAcuerdo.ACUCON}}</b>
+            <div class="right" style="margin: 5px 10px 0px 0px;">
+                <a href="#" ng-click="viewCancel()" style="color:white;"><i class="fa fa-pencil fa-2x"></i></a>
+            </div>
+            <div class="right" style="margin: 5px 12px 0px 0px;">
+                <a href="#" ng-click="viewEliminarAc()" style="color:white;"><i class="fa fa-trash fa-2x"></i></a>
+            </div>
+        </div>
+        <div class="card-content">
+            <!--p>Información del Acuerdo {{orden.ORDCON}}.{{oneAcuerdo.ACUCON}}:</p-->
+            <span class="title"><b>{{oneAcuerdo.ACUDES}}</b></span>
+            <hr>
+            - <b>Presupuesto: ${{oneAcuerdo.ACUPRE}}</b><br>
+            - <b>Con fecha limite el {{oneAcuerdo.ACUTIM}}</b>
+            <br>
+            <b ng-repeat="d in directivos">
+                <b ng-if="d._id == oneAcuerdo.ACUEMP">- Encargad@ para llevar a cabo el acuerdo: {{d.EMPNOM}}</b>
+            </b>
+        </div>
+    </div>
+</div>
+<!-- F I N Editar un acuerdo -->
+
+<div id="eliminarAcuerdo">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-effect waves-block waves-light indigo">
+            <button id="hideEliminarAc" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color: white;">Eliminar Acuerdo</b>
+        </div>
+        <div class="card-content">
+            Esta Seguro que desea eliminar el acuerdo {{orden.ORDCON}}.{{oneAcuerdo.ACUCON}}???
+            <br>
+            ({{oneAcuerdo.ACUDES}})
+            <div class="row">
+                <div class="input-field col s12"></div>
+                    <button class="btn waves-effect waves-light col s12 red" type='button' ng-click="eliminarAcuerdo(oneAcuerdo._id)">
+                        Eliminar
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $('.datepicker').pickadate({
+        format: "dd/mm/yyyy",
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        min:new Date(),
+        firstDay: 1
+    });
+</script>
+
+</body>
+</html>

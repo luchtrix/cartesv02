@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html ng-app="secreto">
+<head>
+	<meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <!--meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /-->
+
+	<title>Home -SECRETARIO-</title>
+	<!-- obtenidos de la red -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Hojas de estilos (css) -->
+    <link rel="stylesheet" type="text/css" href="../../css/material.teal-red.min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/plugin-min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/styles.css">
+    <!-- para iconos -->
+    <link rel="stylesheet" type="text/css" href="../../font-awesome/css/font-awesome.css"/>
+    
+    <!--  Scripts-->
+    <script type="text/javascript" src="../../js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../../js/angular.min.js"></script>
+    <script type="text/javascript" src="../../js/material.min.js"></script>
+    <script type="text/javascript" src="../../js/plugin-min.js"></script>
+    <script type="text/javascript" src="../../js/socket.io-1.3.7.js"></script>
+    <script type="text/javascript" src="../../js/application.js"></script>
+</head>
+
+<body ng-controller="secretarioCtrl">
+<!-- inicio principal -->
+<div id="main">
+	<!-- Inicio Nav -->
+	<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+	    <header class="mdl-layout__header indigo">
+	        <div class="mdl-layout__header-row">
+                <span class="mdl-layout-title">CARTES</span>
+	            <!--span class="mdl-layout-title"><img src="../../img/logo2.png" style="width:50px;"></span-->
+	            <div class="mdl-layout-spacer"></div>
+                
+                <!-- Displayed on Computer and Tablet -->
+                <!-- Search -->
+                <div id="buscador" class="mdh-expandable-search mdl-cell--hide-phone">
+                    <i class="material-icons">search</i>
+                    <input type="text" placeholder="Buscar junta..." size="1" ng-model="busqueda" style="margin:5px 5px 0px 5px;">
+                </div>
+                <!-- Displayed on mobile -->
+                <div class="mdl-layout-spacer mdl-cell--hide-tablet mdl-cell--hide-desktop"></div>
+                <!-- Search button -->
+                <!--button class="mdh-toggle-search mdl-button mdl-js-button mdl-button--icon mdl-cell--hide-tablet mdl-cell--hide-desktop"-->
+                <button class="mdh-toggle-search mdl-button mdl-js-button mdl-button--icon">
+                    <i class="material-icons">search</i>
+                </button>
+                <!-- Buttons -->
+                <div class="mdl-badge" data-badge="0">
+                    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="notif">
+                        <i class="material-icons">notifications</i>
+                    </button>
+                        <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="notif">
+                        <li class="mdl-menu__item"><a href="#"><i class="fa fa-bell-o"></i> No hay notificaciones...</a></li>
+                    </ul>
+                </div>
+                
+	            <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="hdrbtn">
+	                <i class="fa fa-ellipsis-v"></i>
+	            </button>
+	            <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="hdrbtn">
+	                <li class="mdl-menu__item"><a href="#"><i class="fa fa-question"></i> Ayuda...</a></li>
+	                <li class="mdl-menu__item"><a href="#" ng-click="logout()"><i class="fa fa-power-off"></i> Salir</a></li>
+	            </ul>
+	        </div>
+	    </header>
+	    <div class="mdl-layout__drawer">
+	        <span class="mdl-layout-title">
+	            <i class="fa fa-pencil-square-o"></i>  C A R T E S
+	        </span>
+	        <br>
+	        <div class="divider"></div>
+	        <br>
+	        <div class="mdl-navigation">
+	            <a class="mdl-navigation__link" href="home.html"><i class="fa fa-home"></i> Inicio</a>
+                <a class="mdl-navigation__link" href="#"><i class="fa fa-spinner"></i> Juntas sin cerrar</a>
+                <a class="mdl-navigation__link" href="#"><i class="fa fa-thumbs-down"></i> Juntas canceladas</a>
+	            <a class="mdl-navigation__link" href="#"><i class="fa fa-thumbs-up"></i> Juntas cerradas</a>
+	        </div>
+	    </div>
+	</div>
+	<!-- Fin Nav -->
+	<br><br><br>
+
+	<div class="fixed-action-btn">
+		<a id="showForm" class="btn-floating btn-large indigo">
+	    	<i class="fa fa-pencil"></i>
+            <!--i class="material-icons">edit</i-->
+	    </a>
+	</div>
+    <!--div class="fixed-action-btn" style="bottom: 100px;">
+        <button class="btn-floating btn-large badge1 blue" data-badge="0"><i class="fa fa-bell"></i></button>
+    </div-->
+    
+	<!-- Inicio Migajas de pan -->
+	<div class="collapsible littlespace">
+		<!--div class="collapsible-header"><b>Hola {{usuario.EMPNOM}}! / Toda las actividades</b></div-->
+		<div class="collapsible-header"><b>Todas las juntas</b></div>
+	</div>
+	<!-- Fin Migajas de pan -->
+	<!--br-->
+
+	<!-- desde esta pagina que es el home se mostraran todas las juntas de este secretario -->
+	<div ng-if="juntas.length == 0" class="alert alert-danger"><i class="fa fa-ban"></i> No hay registro de juntas por el momento!</div>
+	<ul class="collection littlespace" ng-repeat="j in juntas|filter:busqueda|orderBy: 'JUNCRE':true">
+		<li class="collection-item avatar">
+			<a href="detalle.html?id={{j._id}}/">
+                <!--i class="fa fa-users circle blue"></i-->
+                <i class="fa fa-spinner circle brown" ng-if="j.JUNSTA == 'C'"></i>
+                <i class="fa fa-check circle green" ng-if="j.JUNSTA == 'O'"></i>
+                <i class="fa fa-thumbs-up circle blue" ng-if="j.JUNSTA == 'A'"></i>
+                <i class="fa fa-thumbs-down circle red" ng-if="j.JUNSTA == 'F'"></i>
+                <span class="title" style="color: black;"><b>{{j.JUNNUM}} <i class="fa fa-users"></i></b></span>
+                <p>
+            		Programada para las {{j.JUNHOR}} hrs el {{j.JUNFEC}} en {{j.JUNLUG}}...<br>    	  
+                </p>
+				<div class="progress" ng-if="j.JUNSTA == 'C'">
+					<div class="determinate brown" style="width:25%"></div>
+				</div>
+                <div class="progress" ng-if="j.JUNSTA == 'O'">
+                    <div class="determinate green" style="width:50%"></div>
+                </div>
+                <div class="progress" ng-if="j.JUNSTA == 'A'">
+                    <div class="determinate blue" style="width:75%"></div>
+                </div>
+                <div class="progress" ng-if="j.JUNSTA == 'T'">
+                    <div class="determinate black" style="width:100%"></div>
+                </div>
+				<div class="progress" ng-if="j.JUNSTA == 'F'">
+					<div class="determinate red" style="width:100%"></div>
+				</div>
+                <!--i class="fa fa-check-circle secondary-content"></i-->
+            </a>
+        </li>
+    </ul>
+
+</div>
+<!-- fin principal -->
+
+<!-- -->
+<div id="new">
+	<div class="card" style="margin:6px;">
+		<!--button id="hideForm" class="btn-floating blue" style="margin:5px 0px 0px 10px;">
+			<i class="fa fa-arrow-circle-left"></i>
+		</button--> 
+        <div class="card-image waves-effect waves-block waves-light indigo">
+        	<!--h4 class="center">Nueva Tarea</h4-->
+        	<button id="hideForm" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+				<i class="fa fa-arrow-circle-left"></i>
+			</button>
+        </div>
+        <div class="card-content">
+			<span class="card-title grey-text text-darken-4">
+            	<form ng-submit="nuevaJunta()">
+                	<div class="row">
+                    	<p class="center" style="font-size:15pt;">
+                        	<i class="fa fa-pencil-square-o"></i>
+                            Nueva junta de trabajo
+						</p>
+					</div>
+                    <div class="row margin">
+                    	<div class="input-field col s12 blue-text">
+                        	<i class="fa fa-tag prefix"></i>
+                            <input id="" ng-model="juntaN.JUNNUM" type="text" required="true" placeholder="Clave de la junta"/>
+						</div>
+					</div>
+					<div class="row margin">
+                    	<div class="input-field col s12 blue-text">
+                        	<i class="fa fa-pencil prefix"></i>
+                            <textarea id="icon_prefix2" class="materialize-textarea" ng-model="juntaN.JUNMOT" required="true" placeholder="Motivo de la junta"></textarea>
+                        </div>
+                    </div>
+                    <div class="row margin">
+                    	<div class="input-field col s12 blue-text">
+                        	<i class="fa fa-calendar prefix"></i>
+                            <input id="fecha" type="text" class="datepicker" required="true" placeholder="Fecha de la junta" ng-model="juntaN.JUNFEC"/>
+                        </div>
+                	</div>
+                	<div class="row margin">
+                    	<div class="input-field col s12 blue-text">
+                        	<i class="fa fa-clock-o prefix"></i>
+                            <input id="hora" ng-model="juntaN.JUNHOR" type="time" class="" required="true" placeholder="Hora de la junta"/>
+                        </div>
+                	</div>
+                	<div class="row margin">
+                    	<div class="input-field col s12 blue-text">
+                        	<i class="fa fa-map-marker prefix"></i>
+                            <input id="lugar" ng-model="juntaN.JUNLUG" type="text" required="true" placeholder="Lugar de la junta"/>
+                        </div>
+                	</div>
+                    <div class="row">
+                        <div class="input-field col s12"></div>
+                            <div id="msjError"></div>
+                            <button class="btn waves-effect waves-light col s12" type='submit' name='action'>
+                            	Crear
+                                <i class="fa fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </span>
+            <!--p><a href="#">This is a link</a></p-->
+        </div>
+    </div>
+</div>
+<!-- -->
+<script type="text/javascript">
+    $('.datepicker').pickadate({
+        format: "dd/mm/yyyy",
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        min:new Date(),
+        firstDay: 1
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  /*border-radius: 4px;*/
+
+  border-radius: 12px 12px 12px 12px;
+  -moz-border-radius: 12px 12px 12px 12px;
+  -webkit-border-radius: 12px 12px 12px 12px;
+
+}
+.alert h4 {
+  margin-top: 0;
+  color: inherit;
+}
+.alert .alert-link {
+  font-weight: bold;
+}
+.alert > p,
+.alert > ul {
+  margin-bottom: 0;
+}
+.alert > p + p {
+  margin-top: 5px;
+}
+.alert-dismissable,
+.alert-dismissible {
+  padding-right: 35px;
+}
+.alert-dismissable .close,
+.alert-dismissible .close {
+  position: relative;
+  top: -2px;
+  right: -21px;
+  color: inherit;
+}
+.alert-success {
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+}
+.alert-success hr {
+  border-top-color: #c9e2b3;
+}
+.alert-success .alert-link {
+  color: #2b542c;
+}
+.alert-info {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+.alert-info hr {
+  border-top-color: #a6e1ec;
+}
+.alert-info .alert-link {
+  color: #245269;
+}
+.alert-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
+}
+.alert-warning hr {
+  border-top-color: #f7e1b5;
+}
+.alert-warning .alert-link {
+  color: #66512c;
+}
+.alert-danger {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+.alert-danger hr {
+  border-top-color: #e4b9c0;
+}
+.alert-danger .alert-link {
+  color: #843534;
+}
+
+.littlespace{
+  margin:3px;
+}
+
+/*.absolute {
+  position: absolute;
+  top: 120px;
+  right: 0;
+  width: 300px;
+  height: 200px;
+  border:1px solid black;
+}*/
+
+/*Para el buscador*/
+.mdh-expandable-search {
+  margin: 0 50px;
+  align-items: center;
+  justify-content: center;
+}
+
+.mdh-expandable-search form {
+  max-width: 600px;
+}
+
+.mdh-expandable-search,
+.mdh-expandable-search form,
+.mdh-expandable-search input {
+  /* Cross browser flex-grow */
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.mdh-expandable-search,
+.mdh-expandable-search form {
+  /* Cross browser inline-flex */
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -moz-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+}
+
+/* Position search icon */
+.mdh-expandable-search .material-icons {
+  position: relative;
+  color:    #000000;
+  right: -40px;
+  margin-left: -24px; /* Remove the blank space left behind by the icon being relatively positioned */
+}
+
+.mdh-expandable-search input {
+  outline: none;
+  border: none;
+  font-size: 16px;
+  /*color: #FFFFFF;*/
+  color:    #000000;
+  background-color: #FFFFFF;
+  padding: 0px 35px 0px 70px;
+  height: 40px;
+  line-height: 40px; /* TODO: This was recommended for cross browser compatability of input height, check if its actually needed in modern browsers */
+  
+  border-radius: 5px 5px 5px 5px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+}
+
+.mdh-expandable-search input::-webkit-input-placeholder { /* WebKit browsers */
+    /*color:    #FFFFFF;*/
+    color:    #000000;
+}
+.mdh-expandable-search input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+   /*color:    #FFFFFF;*/
+   color:    #000000;
+   opacity:  1; /* Firefox gives the placeholder a reduced opacity so we have to increase it */
+}
+.mdh-expandable-search input::-moz-placeholder { /* Mozilla Firefox 19+ */
+   color:    #000000;
+   /*color:    #FFFFFF;*/
+   opacity:  1; /* Firefox gives the placeholder a reduced opacity so we have to increase it */
+}
+.mdh-expandable-search input:-ms-input-placeholder { /* Internet Explorer 10+ */
+   /*color:    #FFFFFF;*/
+   color:    #000000;
+}
+
+/* Bug fix: https://github.com/google/material-design-lite/issues/1078
+ * To much padding on the left of header when the menu button is hidden */
+@media screen and (min-width: 851px) {
+  .mdl-layout__header-row {
+    padding: 0 40px 0 40px;
+  }
+}
+
+/* Bug fix for badges being in the wrong location */
+.mdl-badge[data-badge]:after {
+  right: -7px;
+  top: -8px;
+}
+
+/*badge*/
+.badge1 {
+    position:relative;
+  }
+  .badge1[data-badge]:after {
+    content:attr(data-badge);
+    position:absolute;
+    /*top:-10px;*/
+    /*right:-10px;*/
+    top:10px;
+    right:7px;
+    font-size:.6em;
+    background:red;
+    color:white;
+    width:18px;height:18px;
+    font-weight: bolder;
+    text-align:center;
+    line-height:18px;
+    border-radius:50%;
+    box-shadow:0 0 1px #333;
+  }

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html ng-app="secreto">
+<head>
+	<meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <!--meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /-->
+
+	<title>Home -SECRETARIO-</title>
+	<!-- obtenidos de la red -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Hojas de estilos (css) -->
+    <link rel="stylesheet" type="text/css" href="../../css/material.teal-red.min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/plugin-min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/styles.css">
+    <!-- para iconos -->
+    <link rel="stylesheet" type="text/css" href="../../font-awesome/css/font-awesome.css"/>
+    <!--  Scripts-->
+    <script type="text/javascript" src="../../js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../../js/angular.min.js"></script>
+    <script type="text/javascript" src="../../js/material.min.js"></script>
+    <script type="text/javascript" src="../../js/plugin-min.js"></script>
+    <script type="text/javascript" src="../../js/socket.io-1.3.7.js"></script>
+    <script type="text/javascript" src="../../js/materialize.min.js"></script>
+    <script type="text/javascript" src="../../js/application.js"></script>
+</head>
+
+<body ng-controller="secretarioCtrl">
+<!-- -->
+<div id="main">
+	<div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <!--i class="fa fa-trash fa-2x"></i-->
+            <a href="home.html" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </a>
+            <b style="color:white;">Detalles de la Junta</b>
+            <div class="right" style="margin: 5px 12px 0px 0px;" ng-if="junta.JUNSTA != 'F'">
+                <!--a href="#" id="showEdit" style="color:white;"><i class="fa fa-pencil fa-2x"></i></a-->
+                <a href="#" ng-click="viewEdit()" style="color:white;" title="Invitar a supervisores" ng-if="junta.STATINV != 1"><i class="fa fa-pencil fa-2x"></i></a>
+            </div>
+            <div class="right" style="margin: 5px 10px 0px 0px;">
+                <!--a href="#" id="showCancel" style="color:white;" ng-if="junta.JUNSTA != 'F'"><i class="fa fa-thumbs-down fa-2x"></i></a-->
+                <a href="#" ng-click="viewCancel()" style="color:white;" ng-if="junta.JUNSTA != 'F' && junta.JUNSTA != 'O' && junta.JUNSTA != 'A'"><i class="fa fa-thumbs-down fa-2x"></i></a>
+            </div>
+            <div class="right" style="margin: 5px 12px 0px 0px;" ng-if="junta.STATORD != 0">
+                <a href="#" ng-click="invitSup()" style="color:white;"><i class="fa fa-users fa-2x"></i></a>
+            </div>
+        </div>
+        <div class="card-content">
+            <p>
+                <b>
+                    Junta: {{junta.JUNNUM}} => {{junta.JUNSTA}} => {{junta.STATORD}} => {{junta.STATINV}}
+                    <br>
+                    {{junta.JUNMOT}}
+                    <b class="right" ng-if="!bloqueado"><i class="fa fa-lock fa-2x"></i></b>
+                    <b class="right" ng-if="junta.JUNSTA == 'C' && bloqueado"><i class="fa fa-spinner fa-2x"></i></b>
+                    <b class="right" ng-if="junta.JUNSTA == 'O' && bloqueado"><i class="fa fa-check-circle fa-2x"></i></b>
+                    <b class="right" ng-if="junta.JUNSTA == 'F' && bloqueado"><i class="fa fa-thumbs-down fa-2x"></i></b>
+                    <b class="right" ng-if="junta.JUNSTA == 'A' && bloqueado"><i class="fa fa-thumbs-up fa-2x"></i></b>
+                    <!--b class="right" ng-if="junta.JUNSTA == 'T'"><i class="fa fa-thumbs-up fa-2x"></i></b-->
+                </b>
+                <!--b class="green" ng-if="junta.JUNSTA == 'O'">Junta Acordada!</b>
+                <b class="blue" ng-if="junta.JUNSTA == 'A'">Junta Cerrada! <i class="fa fa-thumbs-up"></i> </b-->
+                <br>
+                <p>
+                    Se llevará a cabo el día {{junta.JUNFEC}} a las {{junta.JUNHOR}} hrs en: {{junta.JUNLUG}}
+                </p>
+            </p>
+            <!--Estatus:-->
+            <!--div class="progress" ng-if="junta.JUNSTA == 'C'">
+                <div class="determinate brown" style="width:33.3%"></div>
+            </div>
+            <div class="progress" ng-if="junta.JUNSTA == 'F'">
+                <div class="determinate red" style="width:100%"></div>
+            </div-->
+            <ul class="collapsible" data-collapsible="accordion" ng-if="junta.JUNSTA != 'F' && junta.JUNSTA != 'A' && bloqueado">
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">visibility</i> Cosas que debe de saber de una junta...!</div>
+                    <div class="collapsible-body">
+                        <p>
+                            1._ Primero debe de crear una orden del día (<i class="fa fa-plus"></i>). <br>
+                            2._ Luego de crear una orden del día, el siguiente paso es inviar a los supervisores deseados (<i class="fa fa-users"></i>). <br>
+                            3._ Creado una orden del día, y mandada las invitaciones a los supervisores, lo que resta es estar en la junta o posterior del mismo, para crear los acuerdos de cada punto de la orden del día, con sus respectivas asignaciones. <br>
+                            4._ Una vez teniendo todos los acuerdos, se crea la minuta de estos para cerrar la junta. <br>
+                            5._ Cerrando la junta es necesario enviar los acuerdos a cada uno de los empleados que se fueron asignados para llevar a cabo la actividad de cada acuerdo. <br>
+                            6._ Cuando se terminan de enviar los acuerdos, la junta se cierra totalmente. <br>
+                            <b>Además...</b> puede editar una junta (<i class="fa fa-pencil"></i>) siempre y cuando esta no este cancelada ni cerrada completamente. <br>
+                            También puede cancelar una junta (<i class="fa fa-thumbs-up"></i>), lo debe de hacer antes de aceptar los acuerdos creados.
+                        </p>
+                    </div>
+                </li>
+            </ul>
+            <ul class="collapsible" data-collapsible="accordion" ng-if="junta.JUNSTA == 'F'">
+                <li>
+                    <div class="collapsible-header red"><i class="material-icons">visibility</i> Esta junta a sido cancelada!</div>
+                    <div class="collapsible-body">
+                        <p>
+                            Aqui van a ir los motivos del porque se cancelo la junta...
+                        </p>
+                    </div>
+                </li>
+            </ul>
+            <!--a href="orden.html?id={{junta._id}}" ng-if="junta.JUNSTA != 'F'" class="btn">Orden del día</a-->
+            <!--a href="#" id="showForm" class="btn">Orden del día</a-->
+            <div class="fixed-action-btn">
+                <a id="" class="btn-floating btn-large indigo" ng-click="viewForm()" ng-if="junta.JUNSTA != 'F' && junta.JUNSTA != 'O' && junta.JUNSTA != 'A' && bloqueado">
+                    <i class="fa fa-plus"></i>
+                </a>
+                <a id="" class="btn-floating btn-large red" ng-if="!bloqueado">
+                    <i class="fa fa-lock"></i>
+                </a>
+            </div>
+
+            <hr>
+            <div class="alert alert-warning" ng-if="!bloqueado">
+                <i class="fa fa-lock"></i> Esta junta se habilita en {{diasR}} día(s), el día que esta pactada la junta.
+            </div>
+            <!-- Ver el orden del dia -->
+            <div>
+                <div class="alert alert-danger" ng-if="listOrden.length == 0 && junta.JUNSTA != 'F' && bloqueado">
+                    <i class="fa fa-ban"></i>
+                    No hay todavia una orden del día
+                </div>
+                <h6 class="center" ng-if="listOrden.length > 0">Orden del día {{acuerdosByJunta.length}}</h6>
+
+                <ul class="collapsible popout" data-collapsible="accordion" watch>
+                    <li ng-repeat="o in listOrden">
+                        <div class="collapsible-header">
+                            <!--a href="#" class="collapsible-header"><i class="fa fa-tags"></i>Punto {{o.ORDCON}}</a-->
+                            <i class="fa fa-tags"></i>Punto {{o.ORDCON}} -> {{o.ORDSTA}}
+                            <a href="orden.html?id={{junta._id}}/{{o._id}}" class="right"><i class="fa fa-share" ng-if="junta.JUNSTA != 'F' && junta.JUNSTA != 'O' && junta.JUNSTA != 'A' && junta.STATINV == 1"></i></a>
+                        </div>
+                        <div class="collapsible-body">
+                            <!--div class="right" ng-if="junta.JUNSTA != 'F' && junta.JUNSTA != 'A' && junta.JUNSTA != 'O'"-->
+                            <div class="right" ng-if="junta.JUNSTA != 'F' && junta.JUNSTA != 'A' && junta.JUNSTA != 'O'">
+                                <a ng-click="viewEliminarOrden(o)" title="Eliminar punto de la orden"><i class="material-icons">delete</i></a>
+                                <a ng-click="viewEditarOrden(o)" title="Editar Punto de la orden"><i class="material-icons">edit</i></a>
+                            </div>
+                            <p class="center">{{o.ORDCON}}._ {{o.ORDDES}}</p>
+                            <ul class="collection littlespace" ng-repeat="a in allAcuerdosByEmpresa">
+                                <li class="collection-item avatar" ng-if="a.ACUPUN == o._id">
+                                    <!--a href="#"-->
+                                        <i class="fa fa-star circle blue"></i>
+                                        <span class="title" style="color:black;font-size:9pt;"><b>{{o.ORDCON}}.{{a.ACUCON}}. {{a.ACUDES}}</b></span>
+                                        <br>
+                                        - <b style="font-size:9pt;">Presupuesto: ${{a.ACUPRE}}, con fecha limite {{a.ACUTIM}}</b>
+                                        <br>
+                                        <b ng-repeat="d in directivos">
+                                            <b ng-if="d._id == a.ACUEMP" style="font-size:9pt;">- Encargado(a):{{d.EMPNOM}}</b>
+                                        </b>
+                                    <!--/a-->
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+                <div class="alert alert-success" ng-if="junta.JUNSTA == 'O'">
+                    <b>Junta Acordada! <i class="fa fa-check-circle"></i> </b>
+                </div>
+                <div class="center alert alert-info" ng-if="junta.JUNSTA == 'A'">
+                    <b>Junta Cerrada! <i class="fa fa-thumbs-up"></i> </b>
+                </div>
+                    <div class="row" ng-if="acuerdosByJunta.length > 0">
+                        <div class="input-field col s12"></div>
+                        <button class="btn waves-light col s12" type='submit' name='action' ng-click="viewAcordar()" ng-if="junta.JUNSTA != 'F' && junta.JUNSTA != 'O' && junta.JUNSTA != 'A'">
+                            Crear Minuta de Acuerdos
+                            <i class="fa fa-folder"></i>
+                        </button>
+                        <button class="btn waves-light col s12 indigo" type='submit' name='action' ng-click="viewCerrar()" ng-if="junta.JUNSTA == 'O'">
+                            Enviar acuerdos, y cerrar junta
+                            <i class="fa fa-check-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- editar junta -->
+<div id="editar">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <button id="hideEdit" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+        </div>
+        <div class="card-content">
+            <form ng-submit="updateJunta(junta)">
+                <div class="row">
+                    <p class="center" style="font-size:15pt;">
+                        <i class="fa fa-pencil-square-o"></i>
+                        Editar junta {{junta.JUNNUM}}
+                    </p>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12 blue-text">
+                        <i class="fa fa-tag prefix"></i>
+                        <input id="" ng-model="junta.JUNNUM" type="text" required="true" placeholder="Clave de la junta"/>
+                    </div>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12 blue-text">
+                        <i class="fa fa-pencil prefix"></i>
+                        <textarea id="icon_prefix2" class="materialize-textarea" ng-model="junta.JUNMOT" required="true" placeholder="Motivo de la junta"></textarea>
+                    </div>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12 blue-text">
+                        <i class="fa fa-calendar prefix"></i>
+                        <input id="fecha" ng-model="junta.JUNFEC" type="text" class="datepicker" required="true" placeholder="Fecha de la junta"/>
+                    </div>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12 blue-text">
+                        <i class="fa fa-clock-o prefix"></i>
+                        <input id="hora" ng-model="junta.JUNHOR" type="text" class="" required="true" placeholder="Hora de la junta"/>
+                    </div>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12 blue-text">
+                        <i class="fa fa-map-marker prefix"></i>
+                        <input id="lugar" ng-model="junta.JUNLUG" type="text" class="datepicker" required="true" placeholder="Lugar de la junta"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12"></div>
+                        <button class="btn waves-light col s12" type='submit' name='action'>
+                            Editar
+                            <i class="fa fa-thumbs-up"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- cancelar junta  -->
+<div id="cancelar">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <button id="hideCancel" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+        </div>
+        <div class="card-content">
+            Esta Seguro que desea cancelar la junta {{junta.JUNNUM}}???
+            <div class="row">
+                <div class="input-field col s12"></div>
+                    <button class="btn waves-light col s12 red" type='button' ng-click="cancelJunta(junta._id)">
+                        Cancelar
+                        <i class="fa fa-thumbs-down"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- orden del dia -->
+<div id="new">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <!--h4 class="center">Nueva Tarea</h4-->
+            <button id="hideForm" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color:white;">Punto {{consecutivoOrden}}</b>
+        </div>
+        <div class="card-content">
+            <span class="card-title grey-text text-darken-4">
+                <form ng-submit="nuevaOrden()">
+                    <div class="row">
+                        <p class="center" style="font-size:15pt;">
+                            <i class="fa fa-pencil-square-o"></i>
+                            Nuevo punto para la orden del día
+                        </p>
+                    </div>
+                    <div class="row margin">
+                        <div class="input-field col s12 blue-text">
+                            <i class="fa fa-pencil prefix"></i>
+                            <textarea id="icon_prefix2" class="materialize-textarea" ng-model="ordenN.ORDDES" required="true" placeholder="Descripción del punto de la orden del día"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12"></div>
+                            <button class="btn waves-light col s12" type='submit' name='action'>
+                                Crear
+                                <i class="fa fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </span>
+            <!--p><a href="#">This is a link</a></p-->
+        </div>
+    </div>
+</div>
+
+<!-- Inicio Supervisores -->
+<div id="sup">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <!--h4 class="center">Nueva Tarea</h4-->
+            <button id="hideSup" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color: white;" ng-if="junta.JUNSTA == 'F'">Supervisores Invitados (Junta Cancelada) <i class="fa fa-user"></i></b>
+            <b style="color: white;" ng-if="junta.STATINV == 0 && junta.JUNSTA != 'F'">Seleccionar Supervisores <i class="fa fa-user"></i></b>
+            <b style="color: white;" ng-if="junta.STATINV == 1 && junta.JUNSTA != 'F'">Supervisores Invitados <i class="fa fa-user"></i></b>
+            <div class="right" style="margin: 9px 12px 0px 0px;">
+                <a href="#" ng-click="confirm()" style="color:white;" ng-if="invitados.length > 0 && junta.STATINV == 0"><i class="fa fa-check fa-2x"></i></a>
+            </div>
+        </div>
+        <div class="card-content">
+            <span class="card-title grey-text text-darken-4" ng-if="junta.JUNSTA == 'F' && allInv.length == 0">
+                <p>
+                    No invitó a nadie para esta junta.
+                </p>
+            </span>
+            <span class="card-title grey-text text-darken-4" ng-if="junta.JUNSTA == 'F' && allInv.length > 0">
+                <p>
+                    <h6 class="center">Supervisores que fueron invitados a la Junta: <b>{{junta.JUNNUM}} ({{junta.JUNFEC}} a las {{junta.JUNHOR}} hrs. en {{junta.JUNLUG}})</b></h6>
+                    <b ng-repeat="d in allInv">
+                        - <b>{{d.INVEMN}}</b><br>
+                    </b>
+                </p>
+            </span>
+            <span class="card-title grey-text text-darken-4" ng-if="allInv.length == 0 && junta.JUNSTA != 'F'">
+                <p ng-repeat="d in directivos">
+                    <input type="checkbox" id="{{d._id}}" ng-click="guests(d._id, d.EMPNOM)"/>
+                    <label for="{{d._id}}">{{d.EMPNOM}}</label>          
+                </p>
+            </span>
+            <span class="grey-text text-darken-4" ng-if="allInv.length > 0 && junta.JUNSTA != 'F'">
+                <h6 class="center">Supervisores invitados a la Junta: <b>{{junta.JUNNUM}} ({{junta.JUNFEC}} a las {{junta.JUNHOR}} hrs. en {{junta.JUNLUG}})</b></h6>
+                <b ng-repeat="d in allInv">
+                    - <b>{{d.INVEMN}}</b><br>
+                </b>
+            </span>
+            <!--p><a href="#">This is a link</a></p-->
+        </div>
+        <hr>
+        <div class="alert alert-danger" ng-if="invitados.length == 0 && allInv.length == 0 && junta.JUNSTA != 'F'"><i class="fa fa-ban"></i>  Todavia no has seleccionado ningun directivo</div>
+        <h6 class="center" ng-if="invitados.length > 0 && allInv.length == 0">Directivos invitados a la Junta: {{junta.JUNNUM}}</h6>
+        <div ng-repeat="i in invitados">
+            <!--len => {{invitados.length}}-->
+            <b>
+                - {{i.INVEMN}}
+            </b>
+            <br>
+        </div>
+    </div>
+</div>
+<!-- F i n Supervisores  -->
+
+<div id="confirmInvit">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <button id="hideConfirm" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color:white">Confirmar Invitación</b>
+        </div>
+        <div class="card-content">
+            Confirmar la invitación de los siguientes supervisores a la Junta:{{junta.JUNNUM}}
+            <br><br>
+            <!--h6 class="center" ng-if="invitados.length > 0">Directivos invitados a la Junta: {{junta.JUNNUM}}</h6-->
+            <div ng-repeat="i in invitados">
+                <!--len => {{invitados.length}}-->
+                <b>
+                    - {{i.INVEMN}}
+                </b>
+                <br>
+            </div>
+            <div class="row">
+                <div class="input-field col s12"></div>
+                    <button class="btn waves-light col s12 indigo" type='button' ng-click="enviarInvitaciones()">
+                        Enviar invitaciones
+                        <i class="fa fa-thumbs-up"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="acordar">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <!--i class="fa fa-trash fa-2x"></i-->
+            <button id="hideAcordar" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color:white;">Verifique muy bien los acuerdos</b>
+        </div>
+        <div class="card-content">
+            <div>
+                <h5 class="center" ng-if="listOrden.length > 0">Orden del día {{acuerdosByJunta.length}}</h5>
+                <ul class="collapsible popout" data-collapsible="accordion" watch>
+                    <li ng-repeat="o in listOrden">
+                        <div class="collapsible-header">
+                            <i class="fa fa-tags"></i>Punto {{o.ORDCON}} -> {{o.ORDSTA}}
+                            <a href="orden.html?id={{junta._id}}/{{o._id}}" class="right"><i class="fa fa-share"></i></a>
+                        </div>
+                        <div class="collapsible-body">
+                            <p>{{o.ORDCON}}._ {{o.ORDDES}}</p>
+                            <ul class="collection littlespace" ng-repeat="a in allAcuerdosByEmpresa">
+                                <li class="collection-item avatar" ng-if="a.ACUPUN == o._id">
+                                    <a href="#">
+                                        <i class="fa fa-star circle blue"></i>
+                                        <span class="title" style="color:black;font-size:9pt;"><b>{{o.ORDCON}}.{{a.ACUCON}}. {{a.ACUDES}}</b></span>
+                                        <br>
+                                        - <b style="font-size:9pt;">Presupuesto: ${{a.ACUPRE}}, con fecha limite {{a.ACUTIM}}</b>
+                                        <br>
+                                        <b ng-repeat="d in directivos">
+                                            <b ng-if="d._id == a.ACUEMP" style="font-size:9pt;">- Encargado(a):{{d.EMPNOM}}</b>
+                                        </b>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+                <div class="row" ng-if="acuerdosByJunta.length > 0">
+                    <div class="input-field col s12"></div>
+                        <button class="btn waves-light col s12 indigo" type='submit' name='action' ng-click="cerrarJunta()">
+                            Estoy seguro, crear minuta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="cerrar">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <!--i class="fa fa-trash fa-2x"></i-->
+            <button id="hideCerrar" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color:white;">Enviar Acuerdos y Cerrar Junta!!</b>
+        </div>
+        <div class="card-content">
+            <div>
+                <h5 class="center" ng-if="listOrden.length > 0">Orden del día</h5>
+                <ul class="collapsible popout" data-collapsible="accordion" watch>
+                    <li ng-repeat="o in listOrden">
+                        <div class="collapsible-header">
+                            <i class="fa fa-tags"></i>Punto {{o.ORDCON}} -> {{o.ORDSTA}}
+                        </div>
+                        <div class="collapsible-body">
+                            <p>{{o.ORDCON}}._ {{o.ORDDES}}</p>
+                            <ul class="collection littlespace" ng-repeat="a in allAcuerdosByEmpresa">
+                                <li class="collection-item avatar" ng-if="a.ACUPUN == o._id">
+                                    <!--a href="#"-->
+                                        <i class="fa fa-star circle blue"></i>
+                                        <span class="title" style="color:black;font-size:9pt;"><b>{{o.ORDCON}}.{{a.ACUCON}}. {{a.ACUDES}} --> ({{a.ACUSTA}})</b></span>
+                                        <br>
+                                        - <b style="font-size:9pt;">Presupuesto: ${{a.ACUPRE}}, con fecha limite {{a.ACUTIM}}</b>
+                                        <br>
+                                        <b ng-repeat="d in directivos">
+                                            <b ng-if="d._id == a.ACUEMP" style="font-size:9pt;">- Encargado(a):{{d.EMPNOM}}</b>
+                                        </b>
+                                    <!--/a-->
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+                <div class="row">
+                    <div class="input-field col s12"></div>
+                        <button class="btn waves-light col s12 indigo" type='submit' name='action' ng-click="enviarAcuerdos()">
+                            Enviar acuerdos y cerrar junta!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- opciones para la orden del dia (delete and edit) -->
+<div id="editOrden">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <button id="hideEditO" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color:white">Editar Punto de la Orden del día</b>
+        </div>
+        <div class="card-content">
+            <span class="card-title grey-text text-darken-4" ng-if="totalP > 0">
+                <b>No es posible Editar el punto {{oneOrden.ORDCON}}, esto por que ya cuenta con acuerdos.</b>
+                <br>
+                <b>Si quiere editar el punto, elimine todos los acuerdos. <i class="fa fa-thumbs-up"></i></b>
+            </span>
+            <span class="card-title grey-text text-darken-4" ng-if="totalP == 0">
+                <form ng-submit="updateOrden()">
+                    <div class="row">
+                        <p class="center" style="font-size:15pt;">
+                            <i class="fa fa-pencil-square-o"></i>
+                            Editar punto {{oneOrden.ORDCON}}
+                        </p>
+                    </div>
+                    <div class="row margin">
+                        <div class="input-field col s12 blue-text">
+                            <!--i class="fa fa-pencil prefix"></i-->
+                            <i class="material-icons">edit</i>
+                            <textarea id="icon_prefix2" class="materialize-textarea" ng-model="oneOrden.ORDDES" required="true" placeholder="Descripción del punto de la orden del día"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12"></div>
+                            <button class="btn waves-light col s12" type='submit' name='action'>
+                                Editar
+                                <i class="fa fa-thumbs-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </span>
+        </div>
+    </div>
+</div>
+<div id="eliminarOrden">
+    <div class="card" style="margin:6px;">
+        <div class="card-image waves-block waves-light indigo">
+            <button id="hideEliminarO" class="btn-floating indigo" style="margin:5px 0px 5px 10px;">
+                <i class="fa fa-arrow-circle-left"></i>
+            </button>
+            <b style="color: white">Eliminar Punto:</b>
+        </div>
+        <div class="card-content">
+            <span class="card-title grey-text text-darken-4" ng-if="totalP > 0">
+                <b>No es posible Eliminar el punto {{oneOrden.ORDCON}}, esto por que ya cuenta con acuerdos.</b>
+                <br>
+                <b>Si quiere Eliminar el punto, elimine todos los acuerdos. <i class="fa fa-thumbs-up"></i></b>
+            </span>
+            <div class="row" ng-if="totalP == 0">
+                Esta Seguro que desea eliminar el punto {{oneOrden.ORDCON}} del orden del día???
+                <div class="input-field col s12"></div>
+                    <button class="btn waves-light col s12 red" type='button' ng-click="deleteOrden()">
+                        Eliminar 
+                        <i class="material-icons">delete</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- -->
+
+<script type="text/javascript">
+    $('.datepicker').pickadate({
+        format: "dd/mm/yyyy",
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year
+        min:new Date(),
+        firstDay: 1
+    });
+</script>
+
+</body>
+</html>

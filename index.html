@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html ng-app='secreto'>
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <!-- Good default declaration:
+    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+        * Enable inline JS: add 'unsafe-inline' to default-src
+        * Enable eval(): add 'unsafe-eval' to default-src
+    * Create your own at http://cspisawesome.com
+    -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+    <!--link rel="stylesheet" type="text/css" href="css/index.css" /-->
+    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.css" />
+    <link rel="stylesheet" type="text/css" href="css/estilos.css" />
+    <title>Bienvenido a -CARTES-</title>
+</head>
+
+<body ng-controller="loginCtrl">
+    <div class="cont">
+        <div class="demo">
+            <div class="login">
+                <br><br><br><br><br><br><br><br>
+                <!--img id="profile-img" class="profile-img-card" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" /-->
+                <!--img id="profile-img" class="profile-img-card" src="img/logo2.png" /-->
+                <div class="login__check"></div>
+                <form ng-submit="login()">
+                    <div class="login__form">
+                        <div class="login__row">
+                            <i class="fa fa-key fa-4x"></i>
+                            <input type="text" class="login__input rfc" placeholder="R F C" ng-model="datos.EMPRFC" required/>
+                        </div>
+                        <div class="login__row">
+                            <i class="fa fa-phone fa-4x"></i>
+                            <input type="text" class="login__input cel" placeholder="Telefono Celular" ng-model="datos.EMPCEE" required />
+                        </div>
+                        <div class="login__row">
+                            <i class="fa fa-lock fa-4x"></i>
+                            <input type="password" class="login__input pass" placeholder="Contraseña" ng-model="datos.EMPPAS" required />
+                        </div>
+                        <button type="submit" class="login__submit">
+                            Iniciar Sesión    
+                            <i class="fa fa-unlock"></i>
+                        </button>
+                        <br>
+                        <!--p class="login__signup">Don't have an account? &nbsp;<a>Sign up</a></p-->
+                    </div>
+                </form>
+                <div id="error"></div>
+            </div>
+        </div>
+    </div> 
+    <!--div class="app">
+        <h1>PhoneGap</h1>
+        <div id="registration" class="blink">
+            <p class="event waiting">Requesting Registration ID</p>
+            <p class="event received">Registered</p>
+        </div>
+    </div-->
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <!--script type="text/javascript" src="js/index.js"></script IMPORTANTES ES PARA LOS PUSH NOTIFICATION -->
+    <script type="text/javascript" src="js/init.js"></script>
+    <script type="text/javascript">
+        app.initialize();
+    </script>
+</body>
+</html>
