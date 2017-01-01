@@ -1,6 +1,6 @@
 var app = angular.module('secreto', [])
-//var url_server = 'http://192.168.0.104:3001/';
-var url_server = 'http://192.168.0.32:3001/';
+var url_server = 'http://192.168.0.104:3001/';
+//var url_server = 'http://192.168.0.32:3001/';
 
 /* Controlador para el login */
 app.controller('loginCtrl', function($scope, $http){
